@@ -1,0 +1,12 @@
+SELECT
+    TO_CHAR(r.rental_date, 'YYYY') AS rental_year,
+    TO_CHAR(r.rental_date, 'Month') AS rental_month,
+    TO_CHAR(r.rental_date, 'Day') AS rental_day,
+    EXTRACT(HOUR FROM r.rental_date) AS rental_hour,
+    COUNT(*) AS rental_count
+FROM
+    rental r
+GROUP BY
+    rental_year, rental_month, rental_day, rental_hour
+ORDER BY
+    rental_year, rental_month, rental_day, rental_hour, rental_count DESC;

@@ -1,0 +1,23 @@
+SELECT
+    c.customer_id AS CustomerID,
+    c.first_name AS FirstName,
+    c.last_name AS LastName,
+    CASE 
+        WHEN c.active = 1 THEN 'Active'
+        WHEN c.active = 0 THEN 'Inactive'
+        ELSE 'Other'
+    END AS Status,
+    COUNT(r.rental_id) AS RentalFrequency,
+    AVG(p.amount) AS AvgToSpending,
+    SUM(p.amount) AS TotalSpending,
+    AVG(DATE_PART('day', r.return_date - r.rental_date)) AS AverageRentalDurationDays
+FROM
+    customer c
+JOIN
+    rental r ON c.customer_id = r.customer_id
+JOIN
+    payment p ON r.rental_id = p.rental_id
+GROUP BY
+    c.customer_id, c.active, c.first_name, c.last_name
+ORDER BY
+    TotalSpending DESC;

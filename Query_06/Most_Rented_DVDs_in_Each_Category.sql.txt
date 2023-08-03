@@ -1,0 +1,39 @@
+WITH most_rented AS (
+    SELECT
+        fc.category_id,
+        f.film_id,
+        f.title AS film_title,
+        COUNT(r.rental_id) AS rental_count
+    FROM
+        film f
+    JOIN
+        film_category fc ON f.film_id = fc.film_id
+    JOIN
+        inventory i ON f.film_id = i.film_id
+    JOIN
+        rental r ON i.inventory_id = r.inventory_id
+    GROUP BY
+        fc.category_id, f.film_id, f.title
+),
+most_rented_ranked AS (
+    SELECT
+        *,
+        RANK() OVER (PARTITION BY category_id ORDER BY rental_count DESC) AS rank
+    FROM
+        most_rented
+)
+SELECT
+    mrr.category_id,
+    c.name AS category_name,
+    mrr.film_id,
+    mrr.film_title,
+    mrr.rental_count,
+    mrr.rank
+FROM
+    most_rented_ranked mrr
+JOIN
+    category c ON mrr.category_id = c.category_id
+WHERE
+    mrr.rank = 1
+ORDER BY
+    c.name;

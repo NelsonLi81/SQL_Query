@@ -1,0 +1,36 @@
+SELECT
+    COALESCE(NULLIF(a.district, ''), 'Unknown') AS district,
+    COUNT(*) AS active_customer_count,
+    AVG(p.amount) AS average_spending,
+    CASE 
+        WHEN AVG(p.amount) > 4 THEN c.name
+        ELSE NULL
+    END AS most_spent_category
+FROM
+    customer cust
+JOIN
+    address a ON cust.address_id = a.address_id
+JOIN
+    city ci ON a.city_id = ci.city_id
+JOIN
+    country co ON ci.country_id = co.country_id
+JOIN
+    rental r ON cust.customer_id = r.customer_id
+JOIN
+    payment p ON r.rental_id = p.rental_id
+JOIN
+    inventory i ON r.inventory_id = i.inventory_id
+JOIN
+    film f ON i.film_id = f.film_id
+JOIN
+    film_category fc ON f.film_id = fc.film_id
+JOIN
+    category c ON fc.category_id = c.category_id
+WHERE
+    cust.active = 1
+GROUP BY
+    district, c.name
+HAVING
+    AVG(p.amount) > 4
+ORDER BY
+    district, active_customer_count DESC;

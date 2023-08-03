@@ -1,0 +1,20 @@
+SELECT
+    c.category_id,
+    c.name AS category_name,
+    COUNT(DISTINCT r.rental_id) AS total_rentals,
+    COUNT(DISTINCT r.inventory_id) AS total_unique_dvds,
+    COUNT(DISTINCT r.rental_id) / COUNT(DISTINCT r.inventory_id) AS turnover_rate
+FROM
+    category c
+JOIN
+    film_category fc ON c.category_id = fc.category_id
+JOIN
+    film f ON fc.film_id = f.film_id
+JOIN
+    inventory i ON f.film_id = i.film_id
+LEFT JOIN
+    rental r ON i.inventory_id = r.inventory_id
+GROUP BY
+    c.category_id, c.name
+ORDER BY
+    turnover_rate DESC;

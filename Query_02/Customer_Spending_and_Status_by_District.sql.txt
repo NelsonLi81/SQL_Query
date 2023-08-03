@@ -1,0 +1,29 @@
+SELECT
+    c.customer_id,
+    COALESCE(NULLIF(a.district, ''), 'Unknown') AS customer_district,
+    CASE
+        WHEN num_transactions = 1 THEN 'New Customer'
+        ELSE 'Returning Customer'
+    END AS customer_status,
+    num_transactions,
+    total_spending,
+    total_spending / num_transactions AS average_spending_per_transaction
+FROM
+    customer c
+LEFT JOIN
+    address a ON c.address_id = a.address_id
+JOIN
+    (
+        SELECT
+            r.customer_id,
+            COUNT(r.rental_id) AS num_transactions,
+            SUM(p.amount) AS total_spending
+        FROM
+            rental r
+        JOIN
+            payment p ON r.rental_id = p.rental_id
+        GROUP BY
+            r.customer_id
+    ) AS customer_data ON c.customer_id = customer_data.customer_id
+ORDER BY
+    customer_district, customer_id, customer_status;
